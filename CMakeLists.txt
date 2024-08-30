@@ -18,9 +18,11 @@ FetchContent_MakeAvailable(googletest)
 include_directories(include/)
 include_directories(${SDL2_INCLUDE_DIRS})
 
-add_executable(${PROJECT_NAME} src/main.cc)
+add_executable(${PROJECT_NAME} src/main.cc src/Window.cc src/Grid.cc)
 
-add_executable(${PROJECT_NAME}_test test/main.cc) 
+target_link_libraries(${PROJECT_NAME} SDL2::SDL2)
+
+add_executable(${PROJECT_NAME}_test test/main.cc src/Grid.cc) 
 target_link_libraries(${PROJECT_NAME}_test GTest::gtest_main)
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME}_test)
