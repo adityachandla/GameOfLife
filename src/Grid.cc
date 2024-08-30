@@ -1,13 +1,40 @@
 #include "Grid.h"
 
 void Grid::setBit(int row, int col) {
-    int idx = (row*col)/8;
-    int bit = (row*col)%8;
-    bits[idx] |= (1<<bit);
+    int pos = row * columns + col;
+    bits[pos / 8] |= (1 << (pos % 8));
 }
 
 bool Grid::isSet(int row, int col) {
-    int idx = (row*col)/8;
-    int bit = (row*col)%8;
-    return bits[idx]&(1<<bit);
+    int pos = row * columns + col;
+    return bits[pos / 8] & (1 << (pos % 8));
+}
+
+void Grid::nextState() {
+    std::vector<int> nextState(bits.size());
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < columns; c++) {
+            int idx = (r * columns + c) / 8;
+            int bit = (r * columns + c) % 8;
+            nextState[idx] |= (shouldLive(r, c) << bit);
+        }
+    }
+    bits = std::move(nextState);
+}
+
+bool Grid::shouldLive(int row, int col) {
+    bool currState = isSet(row, col);
+
+    int numLiveNeighbours = 0;
+    for (int i = -1; i <= 1; i++) {
+        if (row+i < 0 || row+i >= rows) continue;
+
+        for (int j = -1; j <= 1; j++) {
+            if (col+j < 0 || col+i >= columns) continue;
+
+            int pos = (row + i) * columns + (col + j);
+            numLiveNeighbours += bits[pos / 8] & (1 << (pos % 8));
+        }
+    }
+    return numLiveNeighbours == 3 || (currState && numLiveNeighbours == 4);
 }

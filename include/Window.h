@@ -2,16 +2,16 @@
 
 #include "Grid.h"
 #include <SDL.h>
+#include <optional>
 #include <tuple>
 
 const int HEIGHT = 600;
 const int WIDTH = 600;
 
-const int NUM_ROWS = 20;
-const int NUM_COLS = 20;
+const int NUM_ROWS = 30;
+const int NUM_COLS = 30;
 
-const int SQAURE_SIDE = 20;
-const int PADDING = 10;
+const int SQUARE_SIDE = 20;
 
 class Window {
     Grid grid{NUM_ROWS, NUM_COLS};
@@ -21,9 +21,10 @@ class Window {
 public:
     Window();
     void draw();
-    void handleClick();
+    void handleClick(int x, int y);
     void flipProcessing();
 private:
     void drawGrid();
+    std::optional<int> search(int, int);
     std::tuple<int,int> getSquareXY(int,int);
 };
