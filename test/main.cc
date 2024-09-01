@@ -29,3 +29,12 @@ TEST(GridTest, GridInitToZero) {
         }
     }
 }
+
+TEST(GridTest, GridNextState) {
+    Grid g{5,5};
+    g.setBit(1,1);
+    g.setBit(2,2);
+    g.setBit(3,1);
+    g.nextState();
+    EXPECT_TRUE(g.isSet(2,1));
+}

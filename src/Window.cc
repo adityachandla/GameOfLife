@@ -2,11 +2,10 @@
 
 Window::Window() {
     SDL_Init(SDL_INIT_VIDEO);
-    window = SDL_CreateWindow("Trial", SDL_WINDOWPOS_UNDEFINED,
+    window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT,
                               SDL_WINDOW_SHOWN);
-    renderer = SDL_CreateRenderer(
-        window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL) {
         printf("Could not initialize renderer %s\n", SDL_GetError());
     }
@@ -20,21 +19,24 @@ void Window::draw() {
 }
 
 void Window::drawGrid() {
+    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
     for (int i = 0; i < NUM_ROWS; i++) {
         for (int j = 0; j < NUM_COLS; j++) {
-            auto pos = getSquareXY(i, j);
-            SDL_Rect filledRect = SDL_Rect{std::get<0>(pos), std::get<1>(pos),
-                                           SQUARE_SIDE, SQUARE_SIDE};
-            SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
             if (grid.isSet(i, j)) {
+                auto pos = getSquareXY(i, j);
+                SDL_Rect filledRect =
+                    SDL_Rect{std::get<0>(pos), std::get<1>(pos), SQUARE_SIDE,
+                             SQUARE_SIDE};
                 SDL_RenderFillRect(renderer, &filledRect);
-            } else {
-                SDL_RenderDrawRect(renderer, &filledRect);
             }
         }
     }
     if (processing) {
-        grid.nextState();
+        //This is to slow down the processing.
+        processCount++;
+        if (processCount%20 == 0) {
+            grid.nextState();
+        }
     }
 }
 
@@ -43,10 +45,10 @@ void Window::handleClick(int x, int y) {
         printf("Clicks not allowed while processing\n");
         return;
     }
-    auto rowOpt = search(x, NUM_COLS);
-    auto colOpt = search(y, NUM_ROWS);
+    auto rowOpt = search(y, NUM_ROWS);
+    auto colOpt = search(x, NUM_COLS);
     if (colOpt.has_value() && rowOpt.has_value()) {
-        grid.setBit(rowOpt.value(), colOpt.value());
+        grid.flipBit(rowOpt.value(), colOpt.value());
     }
 }
 
@@ -69,8 +71,8 @@ std::optional<int> Window::search(int val, int high) {
     return {};
 }
 
-std::tuple<int, int> Window::getSquareXY(int i, int j) {
-    int pos_x = i * SQUARE_SIDE;
-    int pos_y = j * SQUARE_SIDE;
+std::tuple<int, int> Window::getSquareXY(int row, int col) {
+    int pos_x = col * SQUARE_SIDE;
+    int pos_y = row * SQUARE_SIDE;
     return std::tuple<int, int>{pos_x, pos_y};
 }
